@@ -16,4 +16,4 @@ dsply ('Edad el año que viene: ' + %char(edad))'' pausa;
 *inlr = *on;
 return;
 
-//prueba push
+//prueba push 2
