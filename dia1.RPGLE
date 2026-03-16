@@ -15,3 +15,5 @@ dsply ('Edad el año que viene: ' + %char(edad))'' pausa;
 // 5. Finalizar programa y cerrar memoria
 *inlr = *on;
 return;
+
+//prueba push
