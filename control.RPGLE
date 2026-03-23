@@ -7,7 +7,7 @@ dcl-s pausa char(1);
 
 select;
 when (entrada ='S' and edad >=18);
-if(vip='S');
+if (vip='S');
 resultado = 'Bienvenido VIP';
 else;
 resultado = 'Bienvenido';
@@ -15,7 +15,7 @@ endif;
 when (entrada = 'S' and edad<18);
 resultado = 'No puedes entrar, eres menor de edad';
 when (entrada = 'N');
-resultado = 'No puedes entrar, o tienes entrada');
+resultado = 'No puedes entrar, no tienes entrada';
 endsl;
 dsply resultado;
 dsply 'Pulsa una tecla para continuar' '' pausa;
