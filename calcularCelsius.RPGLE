@@ -1,4 +1,4 @@
-*free
+**free
 dcl-s grados int(10) inz(25);
 dcl-s farenheit packed(10:2) inz(0);
       farenheit=(grados*9/5)+32;
