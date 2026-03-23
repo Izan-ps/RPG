@@ -5,5 +5,5 @@ dcl-s total packed(10:2) inz(0);
 dcl-s pausa char(1);
 total=precio*iva;
 dsply ('El total es:'+%char(total));
-dsply ('Presione para salir' pausa);
+dsply ('Presione para salir' '' pausa);
 return;
