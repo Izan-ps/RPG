@@ -4,3 +4,4 @@ dcl-s iva packed(3:2) inz (0.21);
 dcl-s total packed(10:2) inz(0);
 total=precio*iva;
 dsply ('El total es:'+%char(total));
+return;
