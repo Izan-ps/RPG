@@ -1,3 +1,4 @@
+SET SCHEMA SQLIZAN;
 Create Or Replace Table LINEAS
 (
   FECHA       FOR FECALB Date          Not Null Default '1900-01-01',

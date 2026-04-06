@@ -1,3 +1,4 @@
+SET SCHEMA SQLIZAN;
 Create Or Replace Table ARTICULOS
 (
   ARTICULO    FOR CODART Char(3)      Not Null Default ' ',

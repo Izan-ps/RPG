@@ -1,3 +1,4 @@
+SET SCHEMA SQLIZAN;
 Create Or Replace Table CLIENTES
 (
   CLIENTE     FOR CODCLI Decimal(3, 0) Not Null Default 0,

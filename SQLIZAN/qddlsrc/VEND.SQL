@@ -1,3 +1,4 @@
+SET SCHEMA SQLIZAN;
 Create Or Replace Table VENDEDORES
 (
   VENDEDOR    FOR CODVEN Decimal(2, 0) Not Null Default 0,
