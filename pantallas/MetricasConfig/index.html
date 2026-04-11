@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mantenimiento Configuraciones Métricas</title>
+  <!-- React + Babel vía CDN para demo sin bundler -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    /* ── INLINE DE MetricasConfig.css ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-bg:        #0f172a; --color-surface:   #1e293b; --color-surface-2: #263348;
+      --color-border:    #334155; --color-text:      #e2e8f0; --color-text-muted:#94a3b8;
+      --color-primary:   #3b82f6; --color-primary-h: #2563eb; --color-success:   #22c55e;
+      --color-success-h: #16a34a; --color-danger:    #ef4444; --color-danger-h:  #dc2626;
+      --color-warning:   #f59e0b; --color-copy:      #8b5cf6; --color-process:   #06b6d4;
+      --radius: 6px; --shadow: 0 4px 24px rgba(0,0,0,.4);
+    }
+    body { background:var(--color-bg);color:var(--color-text);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;min-height:100vh; }
+    .page { display:flex;flex-direction:column;min-height:100vh;max-width:1200px;margin:0 auto;padding:0 16px 16px; }
+    .page-header { display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--color-border);margin-bottom:16px; }
+    .page-header__user { font-weight:700;color:var(--color-text-muted);font-size:12px;letter-spacing:1px;text-transform:uppercase; }
+    .page-header__title { font-size:16px;font-weight:700;text-decoration:underline;letter-spacing:.5px;text-align:center;flex:1; }
+    .page-header__datetime { font-size:12px;color:var(--color-text-muted); }
+    .filter-bar { display:flex;gap:12px;align-items:flex-end;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius);padding:12px;margin-bottom:12px;flex-wrap:wrap; }
+    .filter-bar__field { display:flex;flex-direction:column;gap:4px;flex:1;min-width:140px; }
+    .filter-bar__field label { font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--color-text-muted); }
+    .filter-bar__field input { background:var(--color-bg);border:1px solid var(--color-border);border-radius:var(--radius);color:var(--color-text);padding:6px 10px;font-size:13px;outline:none;transition:border-color .15s; }
+    .filter-bar__field input:focus { border-color:var(--color-primary); }
+    .table-wrapper { flex:1;overflow-x:auto;border:1px solid var(--color-border);border-radius:var(--radius); }
+    .data-table { width:100%;border-collapse:collapse; }
+    .data-table thead tr { background:var(--color-surface-2); }
+    .data-table th { padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--color-text-muted);border-bottom:1px solid var(--color-border);white-space:nowrap; }
+    .data-table td { padding:9px 12px;border-bottom:1px solid var(--color-border);vertical-align:middle; }
+    .data-table tbody tr:hover { background:var(--color-surface); }
+    .data-table tbody tr:last-child td { border-bottom:none; }
+    .table-empty { text-align:center;color:var(--color-text-muted);padding:32px !important;font-style:italic; }
+    .row--baja td { opacity:.5; }
+    .cell--baja { color:var(--color-danger) !important;text-decoration:line-through; }
+    .row-actions { display:flex;gap:4px;flex-wrap:nowrap; }
+    .btn-action { width:28px;height:28px;border:none;border-radius:4px;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;justify-content:center;transition:opacity .15s,transform .1s; }
+    .btn-action:hover { opacity:.85;transform:scale(1.1); }
+    .btn-action:active { transform:scale(.95); }
+    .btn-action--select { background:var(--color-primary);color:#fff; }
+    .btn-action--edit   { background:var(--color-warning);color:#000; }
+    .btn-action--copy   { background:var(--color-copy);color:#fff; }
+    .btn-action--delete { background:var(--color-danger);color:#fff; }
+    .btn-action--process{ background:var(--color-process);color:#000; }
+    .pagination { display:flex;align-items:center;justify-content:center;gap:16px;padding:12px 0;color:var(--color-text-muted);font-size:13px; }
+    .alert { padding:8px 14px;border-radius:var(--radius);margin-bottom:10px;font-size:13px;font-weight:600; }
+    .alert--danger { background:rgba(239,68,68,.15);border:1px solid var(--color-danger);color:var(--color-danger); }
+    .page-footer { display:flex;gap:10px;padding-top:14px;border-top:1px solid var(--color-border);margin-top:12px;flex-wrap:wrap; }
+    .btn { padding:8px 18px;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;transition:background .15s,opacity .15s; }
+    .btn:disabled { opacity:.4;cursor:not-allowed; }
+    .btn-primary { background:var(--color-primary);color:#fff; }
+    .btn-primary:hover:not(:disabled) { background:var(--color-primary-h); }
+    .btn-success { background:var(--color-success);color:#fff; }
+    .btn-success:hover:not(:disabled) { background:var(--color-success-h); }
+    .btn-danger { background:var(--color-danger);color:#fff; }
+    .btn-danger:hover:not(:disabled) { background:var(--color-danger-h); }
+    .btn-secondary { background:var(--color-surface-2);color:var(--color-text);border:1px solid var(--color-border); }
+    .btn-secondary:hover:not(:disabled) { background:var(--color-surface); }
+    .btn--inline { padding:6px 12px;font-size:12px; }
+    .form-container { flex:1;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius);padding:24px;display:flex;flex-direction:column;gap:14px; }
+    .form-section-title { font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--color-text-muted);margin-bottom:4px;padding-bottom:8px;border-bottom:1px solid var(--color-border); }
+    .form-field { display:grid;grid-template-columns:220px 1fr;grid-template-rows:auto auto;align-items:center;gap:4px 12px; }
+    .form-field--error .form-label { color:var(--color-danger); }
+    .form-label { font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--color-text-muted);white-space:nowrap; }
+    .form-input-wrap { display:flex;align-items:center;gap:6px; }
+    .form-input-wrap--with-btn,.form-input-wrap--endpoint { flex-wrap:nowrap; }
+    .form-prefix { color:var(--color-text-muted);font-weight:600;white-space:nowrap;font-size:13px; }
+    .form-input,.form-select { flex:1;background:var(--color-bg);border:1px solid var(--color-border);border-radius:var(--radius);color:var(--color-text);padding:7px 10px;font-size:13px;outline:none;transition:border-color .15s;min-width:0; }
+    .form-input:focus,.form-select:focus { border-color:var(--color-primary); }
+    .form-input--readonly { opacity:.6;cursor:default;background:var(--color-surface-2); }
+    .form-input--error,.form-select.form-input--error { border-color:var(--color-danger); }
+    .form-input--port { max-width:90px; }
+    .form-hint { grid-column:2;font-size:11px;color:var(--color-text-muted); }
+    .form-hint--error { color:var(--color-danger); }
+    .form-error { grid-column:2;font-size:11px;color:var(--color-danger); }
+    .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:1000; }
+    .modal-window { background:var(--color-surface);border:1px solid var(--color-border);border-radius:8px;box-shadow:var(--shadow);width:min(480px,92vw);overflow:hidden;animation:modal-in .18s ease; }
+    @keyframes modal-in { from{transform:translateY(-20px);opacity:0} to{transform:translateY(0);opacity:1} }
+    .modal-title { padding:14px 20px;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.5px; }
+    .modal-title--info  { background:rgba(59,130,246,.2);color:var(--color-primary); }
+    .modal-title--error { background:rgba(239,68,68,.2);color:var(--color-danger); }
+    .modal-body { padding:16px 20px;display:flex;flex-direction:column;gap:6px; }
+    .modal-line { font-size:13px;color:var(--color-text); }
+    .modal-footer { padding:12px 20px;display:flex;justify-content:flex-end;border-top:1px solid var(--color-border); }
+    @media(max-width:700px){
+      .form-field{grid-template-columns:1fr}
+      .form-error,.form-hint{grid-column:1}
+      .page-header{flex-wrap:wrap;gap:8px}
+      .page-header__title{order:-1;width:100%;text-align:left}
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* ── MessageModal ─────────────────────────────────────────────── */
+function MessageModal({ title, lines = [], isError = false, onContinue }) {
+  return (
+    <div className="modal-backdrop">
+      <div className="modal-window">
+        <div className={`modal-title ${isError ? 'modal-title--error' : 'modal-title--info'}`}>
+          {title}
+        </div>
+        <div className="modal-body">
+          {lines.filter(Boolean).map((line, i) => (
+            <p key={i} className="modal-line">{line}</p>
+          ))}
+        </div>
+        <div className="modal-footer">
+          <button className={`btn ${isError ? 'btn-danger' : 'btn-primary'}`} onClick={onContinue}>
+            Continuar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── MetricasConfigList ───────────────────────────────────────── */
+function MetricasConfigList({ registros, soloActivos, onToggleActivos, onCrear, onSalir,
+    onSeleccionar, onModificar, onCopiar, onEliminar, onProcesar }) {
+  const [filtroCliente, setFiltroCliente] = useState('');
+  const [filtroHost,    setFiltroHost]    = useState('');
+  const [filtroServ,    setFiltroServ]    = useState('');
+  const [pagina,        setPagina]        = useState(0);
+  const MAX_RECORDS = 16, POR_PAGINA = 15;
+
+  const filtrados = registros.filter(r =>
+    r.cliente?.toLowerCase().includes(filtroCliente.toLowerCase()) &&
+    r.hostname?.toLowerCase().includes(filtroHost.toLowerCase()) &&
+    r.servicio?.toLowerCase().includes(filtroServ.toLowerCase())
+  );
+
+  const maxAlcanzado = filtrados.length >= MAX_RECORDS;
+  const totalPaginas = Math.max(1, Math.ceil(filtrados.length / POR_PAGINA));
+  const paginaActual = Math.min(pagina, totalPaginas - 1);
+  const visibles     = filtrados.slice(paginaActual * POR_PAGINA, (paginaActual + 1) * POR_PAGINA);
+  const hayMas       = paginaActual < totalPaginas - 1;
+
+  function resetFiltros() { setFiltroCliente(''); setFiltroHost(''); setFiltroServ(''); setPagina(0); }
+
+  return (
+    <div className="page">
+      <header className="page-header">
+        <span className="page-header__user">USER</span>
+        <h1 className="page-header__title">MANTENIMIENTO CONFIGURACIONES MÉTRICAS</h1>
+        <span className="page-header__datetime">{new Date().toLocaleString('es-ES')}</span>
+      </header>
+
+      <section className="filter-bar">
+        <div className="filter-bar__field">
+          <label>Cliente</label>
+          <input value={filtroCliente}
+            onChange={e => { setFiltroCliente(e.target.value); setPagina(0); }}
+            placeholder="Filtrar cliente…" />
+        </div>
+        <div className="filter-bar__field">
+          <label>Hostname IBM i</label>
+          <input value={filtroHost}
+            onChange={e => { setFiltroHost(e.target.value); setPagina(0); }}
+            placeholder="Filtrar hostname…" />
+        </div>
+        <div className="filter-bar__field">
+          <label>Servicio InfluxDB</label>
+          <input value={filtroServ}
+            onChange={e => { setFiltroServ(e.target.value); setPagina(0); }}
+            placeholder="Filtrar servicio…" />
+        </div>
+        <button className="btn btn-secondary" onClick={resetFiltros}>Limpiar</button>
+      </section>
+
+      {maxAlcanzado && (
+        <div className="alert alert--danger">Número de Registros Máximo Alcanzado</div>
+      )}
+
+      <div className="table-wrapper">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th style={{width:'190px'}}>Acciones</th>
+              <th>Cliente</th>
+              <th>Hostname IBM i</th>
+              <th>Servicio InfluxDB</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visibles.length === 0 && (
+              <tr><td colSpan={4} className="table-empty">No hay registros que mostrar.</td></tr>
+            )}
+            {visibles.map(reg => (
+              <tr key={reg.id} className={reg.baja === 'S' ? 'row--baja' : ''}>
+                <td className="row-actions">
+                  <button className="btn-action btn-action--select" title="Seleccionar" onClick={() => onSeleccionar(reg)}>✓</button>
+                  <button className="btn-action btn-action--edit"   title="Modificar"   onClick={() => onModificar(reg)}>✎</button>
+                  <button className="btn-action btn-action--copy"   title="Copiar"      onClick={() => onCopiar(reg)}>⧉</button>
+                  <button className="btn-action btn-action--delete" title="Eliminar"    onClick={() => onEliminar(reg)}>✕</button>
+                  <button className="btn-action btn-action--process"title="Procesar"    onClick={() => onProcesar(reg)}>▶</button>
+                </td>
+                <td className={reg.baja === 'S' ? 'cell--baja' : ''}>{reg.cliente}</td>
+                <td className={reg.baja === 'S' ? 'cell--baja' : ''}>{reg.hostname}</td>
+                <td className={reg.baja === 'S' ? 'cell--baja' : ''}>{reg.servicio}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {totalPaginas > 1 && (
+        <div className="pagination">
+          <button className="btn btn-secondary" disabled={paginaActual === 0} onClick={() => setPagina(p => p - 1)}>← Anterior</button>
+          <span>Página {paginaActual + 1} / {totalPaginas}</span>
+          <button className="btn btn-secondary" disabled={!hayMas} onClick={() => setPagina(p => p + 1)}>Siguiente →</button>
+        </div>
+      )}
+
+      <footer className="page-footer">
+        <button className="btn btn-danger"     onClick={onSalir}>Salir</button>
+        <button className="btn btn-success"    onClick={onCrear}>+ Crear</button>
+        <button className="btn btn-secondary"  onClick={onToggleActivos}>
+          {soloActivos ? 'Ver Todos' : 'Ver Activos'}
+        </button>
+      </footer>
+    </div>
+  );
+}
+
+/* ── MetricasConfigForm ───────────────────────────────────────── */
+const TIPO_OPTS = [
+  {value:'A',label:'A – Promedio'},{value:'S',label:'S – Suma'},
+  {value:'M',label:'M – Máximo'},{value:'N',label:'N – Mínimo'},
+];
+const FREQ_OPTS = [
+  {value:'1',label:'1 – Cada minuto'},{value:'5',label:'5 – Cada 5 minutos'},
+  {value:'H',label:'H – Cada hora'},{value:'D',label:'D – Diaria'},
+];
+
+function MetricasConfigForm({ registro, modo, onGuardar, onVolver, onSeleccionar }) {
+  const esLectura = modo === 'ver';
+  const titulo = modo==='crear'?'NUEVA CONFIGURACIÓN':modo==='modificar'?'MODIFICAR CONFIGURACIÓN':modo==='copiar'?'COPIAR CONFIGURACIÓN':'VER CONFIGURACIÓN';
+
+  const vacío = { codigoCliente:'', maquinaCliente:'', versionMaquina:'',
+    endpointUrl:'', endpointPuerto:'', host:'', servicio:'',
+    etiquetaPerf:'', descripcionMetrica:'', tipoEstadistica:'', frecuenciaEnvio:'' };
+
+  const [form, setForm]               = useState(vacío);
+  const [errores, setErrores]         = useState({});
+  const [clienteNombre, setCN]        = useState('');
+
+  useEffect(() => {
+    if (registro) {
+      setForm({
+        codigoCliente:      registro.codigoCliente      ?? '',
+        maquinaCliente:     registro.maquinaCliente     ?? '',
+        versionMaquina:     registro.versionMaquina     ?? '',
+        endpointUrl:        registro.endpointUrl        ?? '',
+        endpointPuerto:     registro.endpointPuerto     ?? '',
+        host:               registro.host               ?? '',
+        servicio:           registro.servicio           ?? '',
+        etiquetaPerf:       registro.etiquetaPerf       ?? '',
+        descripcionMetrica: registro.descripcionMetrica ?? '',
+        tipoEstadistica:    registro.tipoEstadistica    ?? '',
+        frecuenciaEnvio:    registro.frecuenciaEnvio    ?? '',
+      });
+      setCN(registro.cliente ?? '');
+    } else {
+      setForm(vacío);
+      setCN('');
+    }
+    setErrores({});
+  }, [registro, modo]);
+
+  const ch = (k, v) => { setForm(p=>({...p,[k]:v})); setErrores(p=>({...p,[k]:undefined})); };
+
+  function validar() {
+    const e = {};
+    if (!form.codigoCliente)   e.codigoCliente   = 'Obligatorio';
+    if (!form.maquinaCliente)  e.maquinaCliente  = 'Obligatorio';
+    if (!form.host)            e.host            = 'Obligatorio';
+    if (!form.servicio)        e.servicio        = 'Obligatorio';
+    if (!form.tipoEstadistica) e.tipoEstadistica = 'Obligatorio';
+    if (!form.frecuenciaEnvio) e.frecuenciaEnvio = 'Obligatorio';
+    if (form.endpointPuerto && isNaN(Number(form.endpointPuerto)))
+      e.endpointPuerto = 'Debe ser un número';
+    setErrores(e);
+    return Object.keys(e).length === 0;
+  }
+
+  function F({label, name, type='text', maxLength, port, select, opts}) {
+    const err = errores[name];
+    return (
+      <div className={`form-field${err?' form-field--error':''}`}>
+        <label className="form-label">{label}</label>
+        <div className="form-input-wrap">
+          {select ? (
+            <select value={form[name]} onChange={e=>ch(name,e.target.value)}
+              disabled={esLectura}
+              className={`form-select${err?' form-input--error':''}${esLectura?' form-input--readonly':''}`}>
+              <option value="">— Selecciona —</option>
+              {opts.map(o=><option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          ) : (
+            <input type={type} value={form[name]} onChange={e=>ch(name,e.target.value)}
+              maxLength={maxLength} readOnly={esLectura}
+              className={`form-input${port?' form-input--port':''}${err?' form-input--error':''}${esLectura?' form-input--readonly':''}`} />
+          )}
+        </div>
+        {err && <span className="form-error">{err}</span>}
+      </div>
+    );
+  }
+
+  return (
+    <div className="page">
+      <header className="page-header">
+        <span className="page-header__user">USER</span>
+        <h1 className="page-header__title">MANTENIMIENTO CONFIGURACIONES MÉTRICAS</h1>
+        <span className="page-header__datetime">{new Date().toLocaleString('es-ES')}</span>
+      </header>
+
+      <div className="form-container">
+        <h2 className="form-section-title">{titulo}</h2>
+
+        {/* Código cliente con botón seleccionar */}
+        <div className={`form-field${errores.codigoCliente?' form-field--error':''}`}>
+          <label className="form-label">Código de Cliente</label>
+          <div className="form-input-wrap form-input-wrap--with-btn">
+            <input type="number" value={form.codigoCliente}
+              onChange={e=>ch('codigoCliente',e.target.value)} readOnly={esLectura} maxLength={9}
+              className={`form-input${errores.codigoCliente?' form-input--error':''}${esLectura?' form-input--readonly':''}`} />
+            {!esLectura && (
+              <button className="btn btn-secondary btn--inline" onClick={onSeleccionar}>Seleccionar</button>
+            )}
+          </div>
+          {clienteNombre && <span className={`form-hint${errores.codigoCliente?' form-hint--error':''}`}>{clienteNombre}</span>}
+          {errores.codigoCliente && <span className="form-error">{errores.codigoCliente}</span>}
+        </div>
+
+        <F label="Máquina Cliente"     name="maquinaCliente"     maxLength={35} />
+        <F label="Versión Máquina"     name="versionMaquina"     maxLength={10} />
+
+        {/* Endpoint / Puerto */}
+        <div className="form-field">
+          <label className="form-label">Endpoint / Puerto</label>
+          <div className="form-input-wrap form-input-wrap--endpoint">
+            <span className="form-prefix">http://</span>
+            <input type="text" value={form.endpointUrl} onChange={e=>ch('endpointUrl',e.target.value)}
+              readOnly={esLectura} maxLength={15} placeholder="dirección"
+              className={`form-input${esLectura?' form-input--readonly':''}`} />
+            <span className="form-prefix">:</span>
+            <input type="number" value={form.endpointPuerto} onChange={e=>ch('endpointPuerto',e.target.value)}
+              readOnly={esLectura} maxLength={5} placeholder="puerto"
+              className={`form-input form-input--port${errores.endpointPuerto?' form-input--error':''}${esLectura?' form-input--readonly':''}`} />
+          </div>
+          {errores.endpointPuerto && <span className="form-error">{errores.endpointPuerto}</span>}
+        </div>
+
+        <F label="Host"                  name="host"               maxLength={50} />
+        <F label="Servicio"              name="servicio"           maxLength={50} />
+        <F label="Etiqueta Performance"  name="etiquetaPerf"       maxLength={35} />
+        <F label="Descripción Métrica"   name="descripcionMetrica" maxLength={35} />
+        <F label="Tipo Estadística"      name="tipoEstadistica"    select opts={TIPO_OPTS} />
+        <F label="Frecuencia Envío"      name="frecuenciaEnvio"    select opts={FREQ_OPTS} />
+      </div>
+
+      <footer className="page-footer">
+        <button className="btn btn-secondary" onClick={onVolver}>← Volver</button>
+        {!esLectura && (
+          <button className="btn btn-primary" onClick={() => { if(validar()) onGuardar({...form, cliente:clienteNombre}); }}>
+            Guardar
+          </button>
+        )}
+      </footer>
+    </div>
+  );
+}
+
+/* ── MetricasConfig (orquestador) ─────────────────────────────── */
+const DATOS = [
+  { id:1,baja:'N',cliente:'ACME CORP',codigoCliente:100,hostname:'AS400-PROD',host:'influx.acme.com',servicio:'metrics-prod',maquinaCliente:'IBM-7300',versionMaquina:'V7R5',endpointUrl:'192.168.1.10',endpointPuerto:8086,etiquetaPerf:'cpu_usage',descripcionMetrica:'Uso de CPU producción',tipoEstadistica:'A',frecuenciaEnvio:'5' },
+  { id:2,baja:'N',cliente:'GLOBEX SOLUTIONS',codigoCliente:200,hostname:'AS400-DEV',host:'influx.globex.io',servicio:'metrics-dev',maquinaCliente:'IBM-7200',versionMaquina:'V7R4',endpointUrl:'10.0.0.5',endpointPuerto:8086,etiquetaPerf:'mem_usage',descripcionMetrica:'Uso de memoria desarrollo',tipoEstadistica:'S',frecuenciaEnvio:'1' },
+  { id:3,baja:'S',cliente:'INITECH INC',codigoCliente:300,hostname:'AS400-BACKUP',host:'influx.initech.net',servicio:'metrics-backup',maquinaCliente:'IBM-7100',versionMaquina:'V7R3',endpointUrl:'172.16.0.20',endpointPuerto:9999,etiquetaPerf:'disk_io',descripcionMetrica:'E/S de disco backup',tipoEstadistica:'M',frecuenciaEnvio:'H' },
+  { id:4,baja:'N',cliente:'UMBRELLA LTD',codigoCliente:400,hostname:'AS400-QA',host:'influx.umbrella.com',servicio:'metrics-qa',maquinaCliente:'IBM-7400',versionMaquina:'V7R5',endpointUrl:'10.10.0.1',endpointPuerto:8086,etiquetaPerf:'net_io',descripcionMetrica:'Tráfico de red QA',tipoEstadistica:'N',frecuenciaEnvio:'D' },
+];
+let nextId = DATOS.length + 1;
+
+function MetricasConfig() {
+  const [registros, setRegistros]   = useState(DATOS);
+  const [vista, setVista]           = useState('lista');
+  const [modo, setModo]             = useState(null);
+  const [regActual, setRegActual]   = useState(null);
+  const [soloActivos, setSolo]      = useState(true);
+  const [modal, setModal]           = useState(null);
+
+  const lista = soloActivos ? registros.filter(r => r.baja !== 'S') : registros;
+
+  const abrirForm = (reg, m) => { setRegActual(reg); setModo(m); setVista('formulario'); };
+  const info = (title, lines, isError=false, onConfirm=null) => setModal({title,lines,isError,onConfirm});
+
+  function handleGuardar(datos) {
+    if (modo === 'crear' || modo === 'copiar') {
+      setRegistros(p => [...p, { ...datos, id: nextId++, baja: 'N' }]);
+    } else {
+      setRegistros(p => p.map(r => r.id === regActual.id ? { ...r, ...datos } : r));
+    }
+    setVista('lista');
+    info('Registro guardado', ['El registro se ha guardado correctamente.']);
+  }
+
+  function handleEliminar(reg) {
+    info('Confirmar eliminación',
+      [`¿Eliminar el registro del cliente "${reg.cliente}"?`, 'Se marcará como dado de baja.'],
+      true,
+      () => {
+        setRegistros(p => p.map(r => r.id === reg.id ? {...r, baja:'S'} : r));
+        setModal(null);
+        info('Eliminado', ['Registro marcado como dado de baja.']);
+      }
+    );
+  }
+
+  return (
+    <>
+      {vista === 'lista' && (
+        <MetricasConfigList
+          registros={lista} soloActivos={soloActivos}
+          onToggleActivos={() => setSolo(v => !v)}
+          onCrear={() => abrirForm(null, 'crear')}
+          onSalir={() => info('Saliendo', ['Hasta luego.'])}
+          onSeleccionar={r => abrirForm(r, 'ver')}
+          onModificar={r => abrirForm(r, 'modificar')}
+          onCopiar={r => abrirForm({...r, id:undefined}, 'copiar')}
+          onEliminar={handleEliminar}
+          onProcesar={r => info('Procesando', [`Cliente: ${r.cliente}`, `Servicio: ${r.servicio}`, 'Enviado a la cola de proceso.'])}
+        />
+      )}
+      {vista === 'formulario' && (
+        <MetricasConfigForm
+          registro={regActual} modo={modo}
+          onGuardar={handleGuardar}
+          onVolver={() => { setVista('lista'); setRegActual(null); setModo(null); }}
+          onSeleccionar={() => info('Selector de clientes', ['Aquí se abriría el selector de clientes del sistema.'])}
+        />
+      )}
+      {modal && (
+        <MessageModal
+          title={modal.title} lines={modal.lines} isError={modal.isError}
+          onContinue={() => { if(modal.onConfirm) modal.onConfirm(); else setModal(null); }}
+        />
+      )}
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<MetricasConfig />);
+</script>
+</body>
+</html>
