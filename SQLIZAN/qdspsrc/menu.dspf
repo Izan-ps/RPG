@@ -1,0 +1,43 @@
+     A*%%TS  SD  20260408  124900  IZAN        REL-V7R4M0  5770-WDS
+     A*%%EC
+     A                                      DSPSIZ(24 80 *DS3)
+     A                                      CA03(03)
+     A          R RMENU
+     A                                  3 30'MENU PRINCPIAL'
+     A                                  6  5'1.Ver total de clientes'
+     A                                  7  5'2.Nombre cliente (Direccion)'
+     A                                  8  5'3.Precio articulo (Cod.Art)'
+     A                                  9  5'4.Importe linea (Alb, Lin)'
+     A                                 10  5'5.Total albaran (Fec.ISO, Alb)'
+     A                                 11  5'6.Vendedor con mas ventas'
+     A                                 14  5'Opcion'
+     A            OPC            1A  B 14 14
+     A                                 16  5'PARAM 1'
+     A            PARAM1        50A  B 16 18
+     A                                 17  5'PARAM 2'
+     A            PARAM2        50A  B 17 18
+     A                                 20  5'RESULTADO:'
+     A            RESULTADO    100A  O 20 17
+     A          R SFNOMB                    SFL
+     A            SNOMBRE       50A  O  8  2
+     A          R CTLNOMB                   SFLCTL(SFNOMB)
+     A                                      SFLSIZ(0100)
+     A                                      SFLPAG(0010)
+     A  40                                  SFLDSP
+     A  40                                  SFLDSPCTL
+     A  41                                  SFLCLR
+     A                                  3 25'NOMBRES DE CLIENTES'
+     A                                  6  2'Nombre'
+     A          R SFVEND                    SFL
+     A            SVENDEDOR     20A  O  8  2
+     A            STOTAL        20A  O  8 25
+     A          R CTLVEND                   SFLCTL(SFVEND)
+     A                                      SFLSIZ(0100)
+     A                                      SFLPAG(0010)
+     A  42                                  SFLDSP
+     A  42                                  SFLDSPCTL
+     A  43                                  SFLCLR
+     A                                  3 20'VENDEDORES CON MAS VENTAS'
+     A                                  6  2'Vendedor'
+     A                                  6 25'Total vendido'
+
